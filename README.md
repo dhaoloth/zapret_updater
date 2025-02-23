@@ -29,7 +29,7 @@
    ```
 4. Запустите скрипт:
    ```bash
-   python update_zapret.py
+   python zapret_updater.py
    ```
 
 ---
