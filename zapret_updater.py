@@ -182,7 +182,7 @@ def download_and_update(latest_version, installed_dir):
     os.makedirs(TEMP_PATH, exist_ok=True)
 
     # Формируем правильный URL для загрузки
-    url = f"https://github.com/{REPO_NAME}/releases/download/{latest_version}/zapret-{latest_version}.zip"
+    url = f"https://github.com/{REPO_NAME}/releases/download/{latest_version}/zapret-discord-youtube-{latest_version}.zip"
     log_and_print(f"Используемый URL для загрузки: {url}")
 
     retries = MAX_RETRIES
