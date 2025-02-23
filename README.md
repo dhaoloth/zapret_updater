@@ -23,7 +23,7 @@
 2. Скачайте этот репозиторий:
    ```bash
    git clone https://github.com/dhaoloth/zapret_updater.git
-   cd zapret-updater
+   cd zapret_updater
    ```
 3. Установите зависимости:
    ```bash
