@@ -1,6 +1,7 @@
 # Zapret Updater
 
 Скрипт для автоматического обновления программы [zapret-discord-youtube](https://github.com/Flowseal/zapret-discord-youtube).
+
 Перед обновлением надо обязательно закрыть консоль с работающим обходчиком!
 
 ---
