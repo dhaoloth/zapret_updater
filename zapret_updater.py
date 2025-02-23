@@ -7,6 +7,7 @@ import time
 import logging
 import subprocess
 import psutil
+from datetime import datetime
 from github import Github
 from github.GithubException import RateLimitExceededException, GithubException
 import tkinter as tk
@@ -25,7 +26,6 @@ logging.basicConfig(
 REPO_NAME = "Flowseal/zapret-discord-youtube"
 TEMP_PATH = os.path.join(os.getenv('TEMP'), 'zapret-temp')
 SIGNATURE_FILES = {
-    'version.txt',
     'service_remove.bat',
     'service_install.bat',
     'service_status.bat',
@@ -39,6 +39,8 @@ SIGNATURE_FILES = {
 }
 MAX_RETRIES = 3
 RETRY_DELAY = 5
+GITHUB_VERSION_URL = "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/refs/heads/main/.service/version.txt"
+RELEASE_URL = "https://github.com/Flowseal/zapret-discord-youtube/releases"
 
 def log_and_print(message, level='info'):
     """Выводит сообщение в консоль и логирует."""
@@ -48,15 +50,57 @@ def log_and_print(message, level='info'):
     else:
         logging.info(message)  # Фолбэк на info
 
-def get_drives():
-    """Получает список доступных дисков."""
+def read_version_file(version_file):
+    """Читает данные из файла version.txt."""
+    data = {}
+    if os.path.exists(version_file):
+        with open(version_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                key, value = line.strip().split(": ", 1)
+                data[key] = value
+    return data
+
+def write_version_file(version_file, data):
+    """Записывает данные в файл version.txt."""
+    with open(version_file, 'w', encoding='utf-8') as f:
+        for key, value in data.items():
+            f.write(f"{key}: {value}\n")
+
+def check_version(installed_dir):
+    """Проверяет версию программы и создает/обновляет version.txt."""
+    version_file = os.path.join(installed_dir, 'version.txt')
+    current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # Получение актуальной версии с GitHub
     try:
-        drives = [d for d in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' if os.path.exists(f"{d}:\\")]
-        log_and_print(f"Доступные диски: {drives}")
-        return drives
-    except Exception as e:
-        log_and_print(f"Ошибка при получении списка дисков: {e}", 'error')
-        return []
+        response = requests.get(GITHUB_VERSION_URL, timeout=5)
+        response.raise_for_status()
+        new_version = response.text.strip()
+    except requests.RequestException as e:
+        log_and_print(f"Ошибка при получении новой версии: {e}", 'error')
+        return
+
+    # Чтение данных из version.txt (если файл существует)
+    version_data = read_version_file(version_file)
+    if not version_data:
+        version_data = {
+            'time': current_timestamp,
+            'ver': new_version,  # Используем актуальную версию с GitHub
+        }
+        write_version_file(version_file, version_data)
+        log_and_print(f"Создан version.txt с версией: {new_version}")
+
+    # Обновление данных в version.txt
+    version_data['time'] = current_timestamp
+    version_data['ver'] = new_version
+    write_version_file(version_file, version_data)
+
+    # Сравнение версий
+    if new_version == version_data['ver']:
+        log_and_print(f"Вы используете последнюю версию: {new_version}.")
+    else:
+        log_and_print(f"Найдена новая версия: {new_version}.")
+        log_and_print(f"Начинаем процесс обновления...")
 
 def is_valid_installation(path):
     """Проверяет, является ли путь корректной установкой программы."""
@@ -67,7 +111,7 @@ def is_valid_installation(path):
         return False
 
     # Проверяем наличие ключевых файлов
-    required_files = {'version.txt', 'service_remove.bat', 'service_install.bat'}
+    required_files = {'service_remove.bat', 'service_install.bat'}
     found_files = set(os.listdir(path))
     if required_files.issubset(found_files):
         return True
@@ -76,7 +120,7 @@ def is_valid_installation(path):
     return False
 
 def search_installation():
-    """Ищет установленную версию по имени папки или сигнатурным файлам."""
+    """Ищет установленную версию по сигнатурным файлам."""
     log_and_print("Поиск установленной версии...")
     for drive in get_drives():
         root_path = f"{drive}:\\"
@@ -94,6 +138,16 @@ def search_installation():
     log_and_print("Установленная версия не найдена", 'warning')
     return None
 
+def get_drives():
+    """Получает список доступных дисков."""
+    try:
+        drives = [d for d in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' if os.path.exists(f"{d}:\\")]
+        log_and_print(f"Доступные диски: {drives}")
+        return drives
+    except Exception as e:
+        log_and_print(f"Ошибка при получении списка дисков: {e}", 'error')
+        return []
+
 def ask_for_installation_path():
     """Запрашивает путь к установке через диалоговое окно."""
     root = tk.Tk()
@@ -103,15 +157,16 @@ def ask_for_installation_path():
 
 def get_current_version(installed_dir):
     """Читает текущую версию из version.txt."""
-    log_and_print(f"Проверка версии в {installed_dir}")
-    try:
-        with open(os.path.join(installed_dir, 'version.txt'), 'r', encoding='utf-8') as f:
-            version = re.search(r'\d+\.\d+\.\d+', f.read())
-            if version:
-                log_and_print(f"Текущая версия: {version.group()}")
-                return version.group()
-    except Exception as e:
-        log_and_print(f"Ошибка чтения version.txt: {e}", 'error')
+    version_file = os.path.join(installed_dir, 'version.txt')
+    if os.path.exists(version_file):
+        try:
+            with open(version_file, 'r', encoding='utf-8') as f:
+                version = re.search(r'\d+\.\d+\.\d+', f.read())
+                if version:
+                    log_and_print(f"Текущая версия: {version.group()}")
+                    return version.group()
+        except Exception as e:
+            log_and_print(f"Ошибка чтения version.txt: {e}", 'error')
     return None
 
 def get_latest_version():
@@ -141,7 +196,7 @@ def run_as_admin(bat_file):
     """Запускает .bat файл от имени администратора."""
     try:
         # Используем PowerShell для запуска от имени администратора
-        command = f'powershell Start-Process "{bat_file}" -Verb RunAs'
+        command = f'powershell Start-Process cmd -ArgumentList "/c {bat_file}" -Verb RunAs'
         result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
         log_and_print(f"Команда выполнена: {result.stdout}")
         return True
@@ -237,6 +292,18 @@ def download_and_update(latest_version, installed_dir):
     # Очищаем временные файлы
     shutil.rmtree(TEMP_PATH, ignore_errors=True)
 
+    # Запускаем check_updates.bat для формирования version.txt (в самом конце)
+    check_updates_bat = os.path.join(installed_dir, 'check_updates.bat')
+    if os.path.exists(check_updates_bat):
+        log_and_print("Запуск check_updates.bat для формирования version.txt...")
+        try:
+            subprocess.run(check_updates_bat, shell=True, check=True)
+            log_and_print("check_updates.bat успешно выполнен")
+        except subprocess.CalledProcessError as e:
+            log_and_print(f"Ошибка при выполнении check_updates.bat: {e}", 'error')
+    else:
+        log_and_print("Файл check_updates.bat не найден", 'warning')
+
 def main():
     log_and_print("Запуск обновления")
     installed_dir = search_installation()
@@ -246,6 +313,9 @@ def main():
         if not installed_dir:
             log_and_print("Путь не указан. Обновление отменено.", 'error')
             return
+
+    # Проверка версии сразу после нахождения директории
+    check_version(installed_dir)
 
     current_version = get_current_version(installed_dir)
     latest_version = get_latest_version()
