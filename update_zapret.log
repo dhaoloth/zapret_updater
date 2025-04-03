@@ -1,0 +1,23 @@
+2025-04-03 19:57:48,256 - INFO - Запуск обновления
+2025-04-03 19:57:48,257 - INFO - Поиск установленной версии...
+2025-04-03 19:57:48,257 - INFO - Доступные диски: ['C', 'E', 'F']
+2025-04-03 19:57:48,257 - DEBUG - Проверка диска C:\
+2025-04-03 19:58:00,244 - DEBUG - Проверка диска E:\
+2025-04-03 19:58:17,127 - INFO - Найдено: E:\zapret-discord-youtube-1.6.3
+2025-04-03 19:58:17,133 - DEBUG - Starting new HTTPS connection (1): raw.githubusercontent.com:443
+2025-04-03 19:58:18,499 - DEBUG - https://raw.githubusercontent.com:443 "GET /Flowseal/zapret-discord-youtube/refs/heads/main/.service/version.txt HTTP/1.1" 200 25
+2025-04-03 19:58:18,501 - INFO - Вы используете последнюю версию: 1.6.5.
+2025-04-03 19:58:18,502 - INFO - Текущая версия: 1.6.5
+2025-04-03 19:58:18,502 - INFO - Запрос версии с GitHub
+2025-04-03 19:58:18,502 - DEBUG - Starting new HTTPS connection (1): api.github.com:443
+2025-04-03 19:58:18,810 - DEBUG - https://api.github.com:443 "GET /repos/Flowseal/zapret-discord-youtube HTTP/1.1" 200 1336
+2025-04-03 19:58:19,061 - DEBUG - Starting new HTTPS connection (1): api.github.com:443
+2025-04-03 19:58:19,945 - DEBUG - https://api.github.com:443 "GET /repos/Flowseal/zapret-discord-youtube/releases/latest HTTP/1.1" 200 1218
+2025-04-03 19:58:19,945 - INFO - Последняя версия: 1.6.5
+2025-04-03 19:58:19,946 - INFO - Обновление не требуется
+2025-04-03 19:58:19,946 - INFO - Завершено
+2025-04-03 20:14:14,556 - INFO - ------------------------------
+2025-04-03 20:14:14,556 - INFO - Запуск скрипта обновления zapret-discord-youtube
+2025-04-03 20:14:14,557 - INFO - Время запуска: 2025-04-03 20:14:14
+2025-04-03 20:14:14,557 - INFO - ------------------------------
+2025-04-03 20:14:14,558 - ERROR - Ошибка: Скрипт должен быть запущен от имени администратора.
