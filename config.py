@@ -17,12 +17,12 @@ SHORTCUT_NAME = "Zapret General (Запуск от Админа).lnk"
 
 REGISTRY_KEY_PATH = r"Software\ZapretUpdater"
 REGISTRY_VALUE_PATH = "InstallPath"
-REGISTRY_VALUE_VERSION = "InstalledVersion" # Новая константа
+REGISTRY_VALUE_VERSION = "InstalledVersion" 
 
 SERVICES_TO_MANAGE = ["zapret", "WinDivert", "WinDivert14"]
 
 SEARCH_DEPTH_LIMIT = 3
-BIN_ESSENTIAL_FILES = {'winws.exe', 'windivert.dll', 'windivert64.sys'} # Должны быть в нижнем регистре
+BIN_ESSENTIAL_FILES = {'winws.exe', 'windivert.dll', 'windivert64.sys'} 
 
 EXCLUDED_DIRS_SEARCH = {
     '$recycle.bin',
