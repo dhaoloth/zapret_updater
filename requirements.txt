@@ -3,3 +3,4 @@ PyGithub>=1.55
 psutil>=5.8.0
 packaging>=21.0
 winshell>=0.6.0
+pywin32>=300
